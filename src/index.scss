@@ -1,0 +1,89 @@
+@font-face {
+  font-family: OpenSans;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./Fonts/OpenSans_SemiCondensed-Regular.woff2) format("woff2");
+}
+
+@font-face {
+  font-family: OpenSans;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./Fonts/OpenSans_SemiCondensed-Bold.woff2) format("woff2");
+}
+
+#root {
+  margin: 0 auto;
+  box-sizing: border-box;
+  position: relative;
+  min-height: 100%;
+
+  display: grid;
+  row-gap: 20px;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "logo"
+    "filterBox"
+    "sortingBox"
+    "message"
+    "listBox";
+  @media (min-width: 800px) {
+    column-gap: 20px;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas:
+      "logo logo"
+      "filterBox sortingBox"
+      "filterBox message"
+      "filterBox listBox";
+  }
+}
+
+body {
+  padding: 0;
+  margin: 0 auto;
+  max-width: 1010px;
+  height: 100%;
+  overflow-x: hidden;
+  background-color: aliceblue;
+}
+
+.ant-checkbox-wrapper {
+  width: 232px !important;
+  height: 40px !important;
+  padding-left: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.ant-checkbox-wrapper:hover {
+  background-color: rgb(241, 252, 255) !important;
+  width: 232px !important;
+  height: 40px !important;
+}
+
+.ant-checkbox-label {
+  font-family: OpenSans !important;
+}
+.ant-radio-button-wrapper {
+  width: 30.4vw;
+  height: 50px;
+  color: rgb(74, 74, 74);
+  font-family: OpenSans;
+  font-size: 1.62vw;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding-top: 10px;
+  text-align: center;
+  @media (min-width: 550px) {
+    width: 168px;
+    font-size: 12px;
+  }
+}
+
+.ant-radio-button-wrapper-checked {
+  background: rgb(33, 150, 243) !important;
+  color: white !important;
+}

@@ -1,0 +1,7 @@
+.sortingBox {
+  grid-area: sortingBox;
+  justify-self: center;
+  @media (min-width: 800px) {
+    justify-self: start;
+  }
+}
