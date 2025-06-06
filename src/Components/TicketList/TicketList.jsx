@@ -1,7 +1,7 @@
 import styles from "./TicketList.module.scss";
 import Ticket from "../Ticket/Ticket";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { nanoid } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -41,6 +41,53 @@ export default function TicketList() {
     }
   }, [dispatch, searchId, searchIdLoaded, stop, ticketsData.tickets]);
 
+  const handleClick = () => {
+    dispatch(setTicketsCount());
+  };
+
+  const transformedCheckedList = useMemo(() => {
+    return checkedList.map((number) => {
+      switch (number) {
+        case "Без пересадок":
+          return 0;
+        case "1 пересадка":
+          return 1;
+        case "2 пересадки":
+          return 2;
+        case "3 пересадки":
+          return 3;
+      }
+    });
+  }, [checkedList]);
+
+  const filteredTickets = useMemo(() => {
+    return ticketsData.tickets.filter((ticket) => {
+      const numberOfStops1 = ticket.segments[0].stops.length;
+      const numberOfStops2 = ticket.segments[1].stops.length;
+      return transformedCheckedList.includes(numberOfStops1 || numberOfStops2);
+    });
+  }, [ticketsData.tickets, transformedCheckedList]);
+
+  const sortedTickets = useMemo(() => {
+    return [...filteredTickets].sort((a, b) => {
+      if (sort === "cheapest") {
+        return a.price - b.price;
+      } else if (sort === "fastest") {
+        return a.segments[0].duration - b.segments[0].duration;
+      } else {
+        return 0;
+      }
+    });
+  }, [filteredTickets, sort]);
+
+  const visibleTickets = useMemo(() => {
+    return sortedTickets.slice(0, ticketsCount);
+  }, [sortedTickets, ticketsCount]);
+
+  const elements = visibleTickets.map((item) => {
+    return <Ticket key={nanoid()} data={item} />;
+  });
+
   if (checkedList.length === 0) {
     return (
       <div className={`${styles.message}`}>
@@ -48,46 +95,6 @@ export default function TicketList() {
       </div>
     );
   }
-
-  const handleClick = () => {
-    dispatch(setTicketsCount());
-  };
-
-  const transformedCheckedList = checkedList.map((number) => {
-    switch (number) {
-      case "Без пересадок":
-        return 0;
-      case "1 пересадка":
-        return 1;
-      case "2 пересадки":
-        return 2;
-      case "3 пересадки":
-        return 3;
-    }
-  });
-
-  const tickets = ticketsData.tickets;
-
-  const filteredTickets = tickets.filter((ticket) => {
-    const numberOfStops = ticket.segments[0].stops.length;
-    return transformedCheckedList.includes(numberOfStops);
-  });
-
-  const sortedTickets = filteredTickets.sort((a, b) => {
-    if (sort === "cheapest") {
-      return a.price - b.price;
-    } else if (sort === "fastest") {
-      return a.segments[0].duration - b.segments[0].duration;
-    } else {
-      return 0;
-    }
-  });
-
-  const visibleTickets = sortedTickets.slice(0, ticketsCount);
-
-  const elements = visibleTickets.map((item) => {
-    return <Ticket key={nanoid()} data={item} />;
-  });
 
   return (
     <>

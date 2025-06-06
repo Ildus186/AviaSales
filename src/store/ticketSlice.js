@@ -24,18 +24,32 @@ export const fetchTickets = createAsyncThunk(
     if (!searchId) {
       throw new Error("Search ID is not available!");
     }
-    try {
-      const response = await fetch(
-        `https://aviasales-test-api.kata.academy/tickets?searchId=${searchId}`,
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! ${response.status}`);
+
+    let retries = 0;
+    const maxRetries = 3;
+
+    while (retries <= maxRetries) {
+      try {
+        const response = await fetch(
+          `https://aviasales-test-api.kata.academy/tickets?searchId=${searchId}`,
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error(
+          `Error fetching tickets (attempt ${retries + 1}):`,
+          error,
+        );
+        retries++;
+        if (retries <= maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } else {
+          return thunkAPI.rejectWithValue(error.message);
+        }
       }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      throw error;
     }
   },
 );
@@ -82,6 +96,7 @@ const ticketSlice = createSlice({
       .addCase(fetchTickets.pending, (state) => {
         state.loading = "pending";
         state.error = null;
+        state.retries = 0;
       })
       .addCase(fetchTickets.fulfilled, (state, action) => {
         state.loading = "succeeded";
@@ -94,10 +109,11 @@ const ticketSlice = createSlice({
           state.tickets = action.payload;
         }
         state.stop = action.payload.stop;
+        state.error = null;
       })
       .addCase(fetchTickets.rejected, (state, action) => {
         state.loading = "failed";
-        state.error = action.error.message || "Failed to fetch tickets";
+        state.error = action.payload || "Failed to fetch tickets";
       });
   },
 });
